@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>退職願</title>
+  <style>
+    @page {
+      size: A4 portrait;
+      margin: 12mm 10mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      background: #fff;
+    }
+
+    body {
+      font-family: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", "MS Mincho", serif;
+      color: #000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .letter {
+      width: 100%;
+      max-width: 210mm;
+      min-height: 273mm;
+      margin: 0 auto;
+      padding: 8mm 6mm;
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0;
+    }
+
+    .col {
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      font-size: 18pt;
+      line-height: 2;
+      letter-spacing: 0.05em;
+      display: flex;
+      flex-direction: column;
+      padding: 0 0.55em;
+      min-height: 240mm;
+    }
+
+    .col-title {
+      font-family: "MS PMincho", "MS Mincho", "Hiragino Mincho ProN", serif;
+      font-size: 30pt;
+      line-height: 1.5;
+      letter-spacing: 0.35em;
+      justify-content: center;
+      align-items: center;
+      padding: 0 0.35em;
+    }
+
+    .col-prefix {
+      justify-content: flex-end;
+      padding-bottom: 2em;
+    }
+
+    .col-body {
+      justify-content: flex-start;
+      padding-top: 0.5em;
+    }
+
+    .col-date {
+      justify-content: flex-start;
+      padding-top: 0.5em;
+      max-height: 12em;
+    }
+
+    .col-sender {
+      justify-content: flex-end;
+      padding-bottom: 1.5em;
+      position: relative;
+    }
+
+    .col-recipient {
+      justify-content: flex-start;
+      padding-top: 0.5em;
+    }
+
+    .col-recipient-rep {
+      padding-top: 1.4em;
+    }
+
+    .hanko {
+      writing-mode: horizontal-tb;
+      width: 2.2em;
+      height: 2.2em;
+      border: 1px solid #d6d6d6;
+      border-radius: 50%;
+      color: #d6d6d6;
+      font-family: Meiryo, sans-serif;
+      font-size: 18pt;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.6em;
+      align-self: center;
+      flex-shrink: 0;
+    }
+
+    .sender-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    @media screen {
+      body {
+        background: #f0f0f0;
+      }
+
+      .letter {
+        background: #fff;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+        margin-top: 12px;
+        margin-bottom: 12px;
+      }
+    }
+
+    @media print {
+      html, body {
+        background: #fff;
+      }
+
+      .letter {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        max-width: none;
+        min-height: auto;
+      }
+
+      .col {
+        min-height: 250mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <article class="letter" id="letter">
+    <section class="col col-title" aria-label="タイトル">退職願</section>
+
+    <section class="col col-prefix" aria-label="私儀">
+      <span>私儀</span>
+    </section>
+
+    <section class="col col-body" aria-label="本文1">
+      このたび、一身上の都合により、勝手ながら、
+    </section>
+
+    <section class="col col-body" aria-label="退職日">
+      <span id="resignDate"></span>を持って退職いたしたく、
+    </section>
+
+    <section class="col col-body" aria-label="本文2">
+      ここにお願い申し上げます。
+    </section>
+
+    <section class="col col-date" aria-label="提出日">
+      <span id="currentDate"></span>
+    </section>
+
+    <section class="col col-sender" aria-label="氏名">
+      <div class="sender-block">
+        <span id="employeeName"></span>
+        <div class="hanko" aria-hidden="true">印</div>
+      </div>
+    </section>
+
+    <section class="col col-recipient" aria-label="会社名">
+      <span id="companyName"></span>
+    </section>
+
+    <section class="col col-recipient col-recipient-rep" aria-label="代表者">
+      <span id="repTitle"></span>　<span id="repName"></span>　様
+    </section>
+  </article>
+
+  <script>
+    (function () {
+      var KANJI_DIGITS = "〇一二三四五六七八九";
+      var KANJI_UNITS = ["", "十", "百", "千"];
+      var KANJI_BIG_UNITS = ["", "万", "億"];
+
+      function decodeBase64Utf8(b64) {
+        var binary = atob(b64.replace(/-/g, "+").replace(/_/g, "/"));
+        var bytes = new Uint8Array(binary.length);
+        for (var i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return new TextDecoder("utf-8").decode(bytes);
+      }
+
+      function parseParams() {
+        var params = new URLSearchParams(window.location.search);
+        var dataParam = params.get("data");
+
+        if (dataParam) {
+          try {
+            return JSON.parse(decodeBase64Utf8(dataParam));
+          } catch (e) {
+            console.warn("Failed to parse base64 data param", e);
+          }
+        }
+
+        return {
+          resignDate: params.get("resignDate") || "",
+          currentDate: params.get("currentDate") || "",
+          employeeName: params.get("employeeName") || "",
+          companyName: params.get("companyName") || "",
+          repTitle: params.get("repTitle") || "",
+          repName: params.get("repName") || ""
+        };
+      }
+
+      function kanjiYear(year) {
+        return String(year)
+          .split("")
+          .map(function (ch) {
+            return KANJI_DIGITS[parseInt(ch, 10)];
+          })
+          .join("");
+      }
+
+      function kanjiNumber(n) {
+        if (n === 0) return KANJI_DIGITS[0];
+        var result = "";
+        var unitIndex = 0;
+        while (n > 0) {
+          var chunk = n % 10000;
+          if (chunk > 0) {
+            var chunkStr = "";
+            var temp = chunk;
+            var smallUnit = 0;
+            while (temp > 0) {
+              var digit = temp % 10;
+              if (digit > 0) {
+                chunkStr = KANJI_DIGITS[digit] + KANJI_UNITS[smallUnit] + chunkStr;
+              } else if (chunkStr && chunkStr.charAt(0) !== KANJI_DIGITS[0]) {
+                chunkStr = KANJI_DIGITS[0] + chunkStr;
+              }
+              temp = Math.floor(temp / 10);
+              smallUnit++;
+            }
+            result = chunkStr + KANJI_BIG_UNITS[unitIndex] + result;
+          }
+          n = Math.floor(n / 10000);
+          unitIndex++;
+        }
+        return result
+          .replace(/〇+/g, "〇")
+          .replace(/〇([十百千万])/g, "$1")
+          .replace(/^一十/, "十");
+      }
+
+      function formatJapaneseDate(value) {
+        if (!value) return "";
+        if (/[年月日]/.test(value)) return value;
+
+        var m = String(value).match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+        if (!m) return value;
+
+        var year = parseInt(m[1], 10);
+        var month = parseInt(m[2], 10);
+        var day = parseInt(m[3], 10);
+
+        return kanjiYear(year) + "年 " + kanjiNumber(month) + "月" + kanjiNumber(day) + "日";
+      }
+
+      function setText(id, value) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = value || "";
+      }
+
+      function render(data) {
+        setText("resignDate", formatJapaneseDate(data.resignDate));
+        setText("currentDate", formatJapaneseDate(data.currentDate));
+        setText("employeeName", data.employeeName);
+        setText("companyName", data.companyName);
+        setText("repTitle", data.repTitle);
+        setText("repName", data.repName);
+      }
+
+      window.taishokuNegai = {
+        render: render,
+        printLetter: function () {
+          window.print();
+        }
+      };
+
+      var data = parseParams();
+
+      if (!data.resignDate && !data.employeeName) {
+        render({
+          resignDate: "2026/06/25",
+          currentDate: "2026/06/25",
+          employeeName: "永井　みゆき",
+          companyName: "株式会社CLOVERワークス",
+          repTitle: "代表取締役",
+          repName: "野口　潔"
+        });
+      } else {
+        render(data);
+      }
+
+      if (new URLSearchParams(window.location.search).get("print") === "1") {
+        window.addEventListener("load", function () {
+          setTimeout(function () {
+            window.print();
+          }, 400);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
