@@ -219,12 +219,44 @@ https://happycare-dev.github.io/taishokunegai/taishoku-negai.html?resignDate=202
 3. Go 分岐により Web Viewer が HTTPS URL を読み込むこと
 4. 縦書きが PC 印刷と同等に見えること
 
-## 7. 印刷について
+## 7. iPad での印刷
+
+FileMaker Go の Web Viewer では **`print=1` の自動印刷は iOS の制限で動かない**ことが多いです。**ユーザーのタップ**が必要です。
+
+### 方法 A: HTML の「印刷」ボタン（推奨）
+
+画面下に **印刷** ボタンが表示されます。タップ → iOS の印刷シート → AirPrint / PDF 保存。
+
+GitHub Pages に最新 HTML を反映後、そのまま使えます。
+
+### 方法 B: FileMaker レイアウトにボタンを置く
+
+`P｜退職願｜iPad` レイアウトに **印刷** ボタンを追加:
+
+```filemaker
+Perform JavaScript in Web Viewer [
+  Object Name: "wvTaishoku" ;
+  Function Name: "printLetter" ;
+  Parameters: ""
+]
+```
+
+Web Viewer の下に配置すると押しやすいです。
+
+### 方法 C: 印刷後に閉じる
+
+`Pause [ Indefinitely ]` の代わりに、レイアウトに **閉じる** ボタン:
+
+```filemaker
+Close Window [ Current Window ]
+```
+
+### 印刷設定（iOS）
+
+- 用紙: A4 縦
+- 倍率: 100%（「ページに合わせる」でも可）
 
 - HTML は A4 縦 (`@page { size: A4 portrait }`) を想定しています。
-- `?print=1` 付きで読み込むと、表示後に `window.print()` で iOS 印刷シートを開きます。
-- 手動印刷: Web Viewer 表示中にスクリプトから  
-  `Perform JavaScript in Web Viewer [ Object Name: "wvTaishoku" ; Function Name: "printLetter" ; Parameters: "" ]`
 
 ## 8. トラブルシューティング
 
