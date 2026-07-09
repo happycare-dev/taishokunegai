@@ -17,7 +17,9 @@
     }
 
     html, body {
+      width: 100%;
       height: 100%;
+      overflow: hidden;
       background: #fff;
     }
 
@@ -28,17 +30,32 @@
       print-color-adjust: exact;
     }
 
-    .letter {
+    /* Web Viewer / 画面表示: A4 をウィンドウに収める */
+    .viewport {
       width: 100%;
-      max-width: 210mm;
-      min-height: 273mm;
-      margin: 0 auto;
-      padding: 8mm 6mm;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .letter-scale {
+      transform-origin: center center;
+    }
+
+    .letter {
+      width: 210mm;
+      height: 297mm;
+      padding: 18mm 14mm 16mm;
       display: flex;
       flex-direction: row-reverse;
       justify-content: center;
       align-items: stretch;
       gap: 0;
+      background: #fff;
+      box-sizing: border-box;
     }
 
     .col {
@@ -49,8 +66,9 @@
       letter-spacing: 0.05em;
       display: flex;
       flex-direction: column;
-      padding: 0 0.55em;
-      min-height: 240mm;
+      padding: 0 0.45em;
+      height: 100%;
+      flex-shrink: 0;
     }
 
     .col-title {
@@ -75,23 +93,21 @@
 
     .col-date {
       justify-content: flex-start;
-      padding-top: 0.5em;
-      max-height: 12em;
+      padding-top: 0.2em;
     }
 
     .col-sender {
       justify-content: flex-end;
-      padding-bottom: 1.5em;
-      position: relative;
+      padding-bottom: 8mm;
     }
 
     .col-recipient {
       justify-content: flex-start;
-      padding-top: 0.5em;
+      padding-top: 0.2em;
     }
 
     .col-recipient-rep {
-      padding-top: 1.4em;
+      padding-top: 2.5em;
     }
 
     .hanko {
@@ -117,39 +133,39 @@
       align-items: center;
     }
 
-    @media screen {
-      body {
-        background: #f0f0f0;
-      }
-
-      .letter {
-        background: #fff;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
-        margin-top: 12px;
-        margin-bottom: 12px;
-      }
-    }
-
     @media print {
       html, body {
+        overflow: visible;
         background: #fff;
       }
 
+      .viewport {
+        display: block;
+        overflow: visible;
+        height: auto;
+      }
+
+      .letter-scale {
+        transform: none !important;
+      }
+
       .letter {
-        box-shadow: none;
-        margin: 0;
-        padding: 0;
-        max-width: none;
-        min-height: auto;
+        width: 100%;
+        height: auto;
+        min-height: 250mm;
+        padding: 12mm 10mm;
+        margin: 0 auto;
       }
 
       .col {
-        min-height: 250mm;
+        height: 240mm;
       }
     }
   </style>
 </head>
 <body>
+  <div class="viewport" id="viewport">
+    <div class="letter-scale" id="letterScale">
   <article class="letter" id="letter">
     <section class="col col-title" aria-label="タイトル">退職願</section>
 
@@ -188,6 +204,8 @@
       <span id="repTitle"></span>　<span id="repName"></span>　様
     </section>
   </article>
+    </div>
+  </div>
 
   <script>
     (function () {
@@ -277,7 +295,7 @@
         var month = parseInt(m[2], 10);
         var day = parseInt(m[3], 10);
 
-        return kanjiYear(year) + "年 " + kanjiNumber(month) + "月" + kanjiNumber(day) + "日";
+        return kanjiYear(year) + "年\u3000" + kanjiNumber(month) + "月" + kanjiNumber(day) + "日";
       }
 
       function setText(id, value) {
@@ -294,11 +312,30 @@
         setText("repName", data.repName);
       }
 
+      function fitLetterToViewport() {
+        var viewport = document.getElementById("viewport");
+        var scaleEl = document.getElementById("letterScale");
+        var letter = document.getElementById("letter");
+        if (!viewport || !scaleEl || !letter) return;
+
+        scaleEl.style.transform = "none";
+        var vw = viewport.clientWidth;
+        var vh = viewport.clientHeight;
+        var lw = letter.offsetWidth;
+        var lh = letter.offsetHeight;
+        if (!lw || !lh) return;
+
+        var padding = 8;
+        var scale = Math.min((vw - padding) / lw, (vh - padding) / lh, 1);
+        scaleEl.style.transform = "scale(" + scale + ")";
+      }
+
       window.taishokuNegai = {
         render: render,
         printLetter: function () {
           window.print();
-        }
+        },
+        fit: fitLetterToViewport
       };
 
       var data = parseParams();
@@ -316,13 +353,17 @@
         render(data);
       }
 
-      if (new URLSearchParams(window.location.search).get("print") === "1") {
-        window.addEventListener("load", function () {
+      function onReady() {
+        fitLetterToViewport();
+        if (new URLSearchParams(window.location.search).get("print") === "1") {
           setTimeout(function () {
             window.print();
-          }, 400);
-        });
+          }, 500);
+        }
       }
+
+      window.addEventListener("load", onReady);
+      window.addEventListener("resize", fitLetterToViewport);
     })();
   </script>
 </body>
