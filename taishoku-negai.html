@@ -168,6 +168,15 @@
       opacity: 0.85;
     }
 
+    .print-bar--prompt button {
+      animation: print-prompt 1.2s ease-in-out 3;
+    }
+
+    @keyframes print-prompt {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
     @media print {
       .print-bar {
         display: none !important;
@@ -392,22 +401,43 @@
         setText("repName", data.repName);
       }
 
+      function getPrintBarHeight() {
+        var bar = document.querySelector(".print-bar");
+        return bar ? bar.offsetHeight : 0;
+      }
+
       function fitLetterToViewport() {
         var viewport = document.getElementById("viewport");
         var scaleEl = document.getElementById("letterScale");
         var letter = document.getElementById("letter");
         if (!viewport || !scaleEl || !letter) return;
 
+        var barH = getPrintBarHeight();
+        viewport.style.paddingBottom = barH ? barH + "px" : "";
+
         scaleEl.style.transform = "none";
         var vw = viewport.clientWidth;
-        var vh = viewport.clientHeight;
+        var vh = viewport.clientHeight - barH;
         var lw = letter.offsetWidth;
         var lh = letter.offsetHeight;
-        if (!lw || !lh) return;
+        if (!lw || !lh || vh <= 0) return;
 
         var padding = 8;
         var scale = Math.min((vw - padding) / lw, (vh - padding) / lh, 1);
         scaleEl.style.transform = "scale(" + scale + ")";
+      }
+
+      function promptPrintIfRequested() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get("print") !== "1") return;
+
+        var bar = document.querySelector(".print-bar");
+        if (!bar) return;
+
+        bar.classList.add("print-bar--prompt");
+        requestAnimationFrame(function () {
+          bar.scrollIntoView({ block: "end" });
+        });
       }
 
       window.taishokuNegai = {
@@ -435,13 +465,14 @@
 
       function onReady() {
         fitLetterToViewport();
+        promptPrintIfRequested();
         var btn = document.getElementById("btnPrint");
         if (btn) {
           btn.addEventListener("click", function () {
             window.print();
           });
         }
-        /* iOS FileMaker Go: 自動 print は無視されることが多い → 上のボタンを使う */
+        /* iOS FileMaker Go: window.print() はユーザータップが必要 → print=1 はボタンを案内 */
       }
 
       window.addEventListener("load", onReady);

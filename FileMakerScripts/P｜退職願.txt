@@ -18,8 +18,7 @@ If [ isiOS ]
 	Perform Script [ Specified: From list ; “P｜退職願｜URL構築” ; Parameter:    ]
 	Set Variable [ $url ; Value: Get ( ScriptResult ) ] 
 	Set Web Viewer [ Object Name: "wvTaishoku" ; URL: $url ] 
-	Pause/Resume Script [ Indefinitely ] 
-	Close Window [ Current Window ] 
+	# フローティングウィンドウはレイアウトの「印刷」「キャンセル」ボタンで閉じる（Pause/Resume 不要）
 Else
 	Go to Related Record [ Show only related records ; From table: “入社登録_EmployeeM” ; Using layout: “P｜退職願” (入社登録_EmployeeM) ] 
 	Print Setup [ Restore ; With dialog: Off ] 
