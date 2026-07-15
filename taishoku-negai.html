@@ -139,49 +139,7 @@
       align-items: center;
     }
 
-    /* 画面のみ（印刷時は非表示）— iPad はタップが必要 */
-    .print-bar {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
-      background: rgba(255, 255, 255, 0.95);
-      border-top: 1px solid #ddd;
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      z-index: 100;
-    }
-
-    .print-bar button {
-      font-family: -apple-system, "Hiragino Sans", Meiryo, sans-serif;
-      font-size: 17px;
-      padding: 10px 28px;
-      border: none;
-      border-radius: 8px;
-      background: #007aff;
-      color: #fff;
-    }
-
-    .print-bar button:active {
-      opacity: 0.85;
-    }
-
-    .print-bar--prompt button {
-      animation: print-prompt 1.2s ease-in-out 3;
-    }
-
-    @keyframes print-prompt {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.06); }
-    }
-
     @media print {
-      .print-bar {
-        display: none !important;
-      }
-
       html, body {
         width: auto;
         height: auto;
@@ -292,10 +250,6 @@
     </div>
   </div>
 
-  <div class="print-bar" aria-label="印刷操作">
-    <button type="button" id="btnPrint">印刷</button>
-  </div>
-
   <script>
     (function () {
       var KANJI_DIGITS = "〇一二三四五六七八九";
@@ -401,50 +355,32 @@
         setText("repName", data.repName);
       }
 
-      function getPrintBarHeight() {
-        var bar = document.querySelector(".print-bar");
-        return bar ? bar.offsetHeight : 0;
-      }
-
       function fitLetterToViewport() {
         var viewport = document.getElementById("viewport");
         var scaleEl = document.getElementById("letterScale");
         var letter = document.getElementById("letter");
         if (!viewport || !scaleEl || !letter) return;
 
-        var barH = getPrintBarHeight();
-        viewport.style.paddingBottom = barH ? barH + "px" : "";
-
         scaleEl.style.transform = "none";
         var vw = viewport.clientWidth;
-        var vh = viewport.clientHeight - barH;
+        var vh = viewport.clientHeight;
         var lw = letter.offsetWidth;
         var lh = letter.offsetHeight;
-        if (!lw || !lh || vh <= 0) return;
+        if (!lw || !lh) return;
 
         var padding = 8;
         var scale = Math.min((vw - padding) / lw, (vh - padding) / lh, 1);
         scaleEl.style.transform = "scale(" + scale + ")";
       }
 
-      function promptPrintIfRequested() {
-        var params = new URLSearchParams(window.location.search);
-        if (params.get("print") !== "1") return;
-
-        var bar = document.querySelector(".print-bar");
-        if (!bar) return;
-
-        bar.classList.add("print-bar--prompt");
-        requestAnimationFrame(function () {
-          bar.scrollIntoView({ block: "end" });
-        });
+      function printLetter() {
+        window.print();
       }
 
+      window.printLetter = printLetter;
       window.taishokuNegai = {
         render: render,
-        printLetter: function () {
-          window.print();
-        },
+        printLetter: printLetter,
         fit: fitLetterToViewport
       };
 
@@ -465,14 +401,6 @@
 
       function onReady() {
         fitLetterToViewport();
-        promptPrintIfRequested();
-        var btn = document.getElementById("btnPrint");
-        if (btn) {
-          btn.addEventListener("click", function () {
-            window.print();
-          });
-        }
-        /* iOS FileMaker Go: window.print() はユーザータップが必要 → print=1 はボタンを案内 */
       }
 
       window.addEventListener("load", onReady);
