@@ -9,5 +9,5 @@ Set Variable [ $json ; Value: JSONSetElement ( "" ;
 	)] 
 // Set Variable [ $data ; Value: Base64Encode ( TextEncode ( $json ; "UTF-8" ; 1 ) ) ] 
 Set Variable [ $data ; Value: Base64EncodeRFC ( 4648 ; $json ) ] 
-Set Variable [ $url ; Value: $base & "?data=" & $data & "&print=1" ] 
+Set Variable [ $url ; Value: $base & "?data=" & $data ] 
 Exit Script [ Text Result: $url ] 

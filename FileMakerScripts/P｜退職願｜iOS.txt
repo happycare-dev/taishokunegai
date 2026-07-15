@@ -1,0 +1,22 @@
+# P｜退職願｜iOS in file InformationBoard (dev.happycare.host)
+
+# ##################################
+#    概要　　　　：iPadで退職願の印刷プレビューを表示
+#    引数　　　　：
+#    戻り値　　　：
+#    トリガ　　　：レイアウト「P｜退職願｜iPad」の「印刷」ボタン
+#    作成日　　　：20260711 ANH
+# ##################################
+# 
+# Open URL は FileMaker Go の簡易ブラウザ（Open in Safari / Done）を開くだけで
+# 印刷プレビューにはならない。Web Viewer から window.print() を呼ぶ。
+Go to Object [ Object Name: "wvTaishoku" ] 
+Perform JavaScript in Web Viewer [ Object Name: "wvTaishoku" ; Function Name: "printLetter" ] 
+# 
+# ※「印刷」ボタン設定（レイアウトモード）— 重要:
+#   スクリプト実行: P｜退職願｜iOS
+#   オプション（▶）→「現在のスクリプトを一時停止のまま」(Pause) ← Resume ではない
+#   印刷プレビュー表示中に Web Viewer を閉じないため
+# 
+# 印刷後は「キャンセル」ボタン（Resume）で閉じる → Go to Object「退職日まで」
+# 

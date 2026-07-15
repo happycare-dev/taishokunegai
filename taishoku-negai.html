@@ -374,6 +374,8 @@
       }
 
       function printLetter() {
+        var scaleEl = document.getElementById("letterScale");
+        if (scaleEl) scaleEl.style.transform = "none";
         window.print();
       }
 
