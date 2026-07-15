@@ -1,0 +1,13 @@
+Set Variable [ $base ; Value: Case ( 		not IsEmpty ( IF::g_TaishokuHtmlUrl ) ; IF::g_TaishokuHtmlUrl ; 		"https://happycare-dev.github.io/taishokunegai/taishoku-negai.html" 	) ] 
+Set Variable [ $json ; Value: JSONSetElement ( "" ;
+		[ "resignDate"   ; GetAsText ( IF::g_Date_1 ) ; JSONString ] ;
+		[ "currentDate"  ; GetAsText ( Get ( CurrentDate ) ) ; JSONString ] ;
+		[ "employeeName" ; 入社登録_EmployeeM::氏名 ; JSONString ] ;
+		[ "companyName"  ; 入社登録_EmployeeM_BranchM_CompanyM::会社名 ; JSONString ] ;
+		[ "repTitle"     ; 入社登録_EmployeeM_BranchM_CompanyM::代表者役職名 ; JSONString ] ;
+		[ "repName"      ; 入社登録_EmployeeM_BranchM_CompanyM::代表者氏名 ; JSONString ]
+	)] 
+// Set Variable [ $data ; Value: Base64Encode ( TextEncode ( $json ; "UTF-8" ; 1 ) ) ] 
+Set Variable [ $data ; Value: Base64EncodeRFC ( 4648 ; $json ) ] 
+Set Variable [ $url ; Value: $base & "?data=" & $data & "&print=1" ] 
+Exit Script [ Text Result: $url ] 

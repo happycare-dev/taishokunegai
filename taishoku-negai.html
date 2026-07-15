@@ -82,9 +82,11 @@
     }
 
     .col-prefix {
-      justify-content: flex-end;
-      padding-bottom: 2em;
-    }
+  display: flex;
+  flex-direction: row; /* In vertical-rl writing mode, "row" follows the inline (vertical) axis, so this actually controls top/bottom placement */
+  justify-content: flex-end; /* Pushes the text directly to the bottom */
+  height: 100%; /* Ensure the section spans the full height of the letter container */
+}
 
     .col-body {
       justify-content: flex-start;
@@ -108,6 +110,10 @@
 
     .col-recipient-rep {
       padding-top: 2.5em;
+    }
+
+    .rep-line2 {
+      white-space: nowrap;
     }
 
     .hanko {
@@ -221,7 +227,7 @@
       }
 
       .col-recipient-rep {
-        padding-top: 1.8em;
+        white-space: nowrap;
       }
 
       .hanko {
@@ -270,7 +276,8 @@
     </section>
 
     <section class="col col-recipient col-recipient-rep" aria-label="代表者">
-      <span id="repTitle"></span>　<span id="repName"></span>　様
+      <span id="repTitle"></span><br>
+      <span class="rep-line2"><span id="repName"></span>　様</span>
     </section>
   </article>
     </div>

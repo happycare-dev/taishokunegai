@@ -1,0 +1,34 @@
+# P｜退職願 in file InformationBoard (dev.happycare.host)
+
+# ##################################
+#    概要　　　　：退職願を印刷
+#    引数　　　　：
+#    戻り値　　　：
+#    トリガ　　　：
+#    作成日　　　：20200224NK
+# ##################################
+# 
+Commit Records/Requests [ With dialog: Off ] 
+Allow User Abort [ Off ]
+Freeze Window
+New Window [ Style: Floating Document ; Name: "退職願を印刷" ; Using layout: <Current Layout> ] 
+# 2026.07 iPadの対応
+If [ isiOS ] 
+	Go to Related Record [ Show only related records ; From table: “入社登録_EmployeeM” ; Using layout: “P｜退職願｜iPad” (入社登録_EmployeeM) ] 
+	Perform Script [ Specified: From list ; “P｜退職願｜URL構築” ; Parameter:    ]
+	Set Variable [ $url ; Value: Get ( ScriptResult ) ] 
+	Set Web Viewer [ Object Name: "wvTaishoku" ; URL: $url ] 
+	Pause/Resume Script [ Indefinitely ] 
+	Close Window [ Current Window ] 
+Else
+	Go to Related Record [ Show only related records ; From table: “入社登録_EmployeeM” ; Using layout: “P｜退職願” (入社登録_EmployeeM) ] 
+	Print Setup [ Restore ; With dialog: Off ] 
+	Adjust Window [ Resize to Fit ]
+	Perform Script [ Specified: From list ; “設定｜プリンタ指定 ｜たて” ; Parameter:    ]
+	Enter Browse Mode [ Pause: Off ]
+	# 
+	Close Window [ Current Window ] 
+End If
+# 
+# 
+Go to Object [ Object Name: "退職日まで" ] 
